@@ -74,7 +74,7 @@ const char *topic_control = "home/control/command";
 #define PUBLISH_INTERVAL 5000    // Publish every 5 seconds
 #define SENSOR_READ_INTERVAL 100 // Read sensors every 100ms
 #define ACS712_OFFSET 1.65       // Midpoint voltage (0A)
-#define PRESENCE_TIMEOUT 300000  // 5 minutes (ms)
+#define PRESENCE_TIMEOUT 3000    // 5 minutes (ms)
 // ==================== OBJECTS ====================
 WiFiClient espClient;
 PubSubClient mqtt(espClient);
