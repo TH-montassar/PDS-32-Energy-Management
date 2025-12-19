@@ -19,3 +19,7 @@ platformio run -e esp32dev
 ÉTAPE 4 - Je veux le code ESP32 complet done
 ÉTAPE 5: Frontend Dashboard
 ÉTAPE 6: Tests et intégration finale
+
+
+| Lecture ACS712 | ✅ | Courant simulé OK  where is ?
+| Lecture LDR | ✅ | Luminosité 0-100% OK | why 0 or 100?

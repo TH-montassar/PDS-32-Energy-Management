@@ -104,6 +104,9 @@ bool autoMode = true;
 unsigned long presenceTimeout = 300000; // 5 minutes
 unsigned long lastPresenceTime = 0;
 
+bool autoModeTemporarilyDisabled = false;
+unsigned long autoModeDisabledTime = 0;
+const unsigned long AUTO_MODE_TIMEOUT = 30000; // 30 seconds
 void setup()
 {
   Serial.begin(115200);
@@ -142,6 +145,22 @@ void setup()
 
   blinkLED(3);
 }
+
+// ==================== CHECK AUTO MODE TIMER ====================
+void checkAutoModeTimer()
+{
+  if (autoModeTemporarilyDisabled && !autoMode)
+  {
+    // Check if 30 seconds have passed
+    if (millis() - autoModeDisabledTime >= AUTO_MODE_TIMEOUT)
+    {
+      autoMode = true;
+      autoModeTemporarilyDisabled = false;
+      Serial.println("✓ Auto mode re-enabled automatically (30s timeout)");
+      publishActuatorStatus();
+    }
+  }
+}
 // ==================== MAIN LOOP ====================
 void loop()
 {
@@ -165,6 +184,9 @@ void loop()
     publishData();
     lastPublish = millis();
   }
+
+  // Check auto mode timer (NEW!)
+  checkAutoModeTimer();
 
   // Automation logic
   if (autoMode)
@@ -240,65 +262,85 @@ void reconnectMQTT()
 }
 
 // ==================== MQTT CALLBACK ====================
+// ==================== MQTT CALLBACK ====================
 void mqttCallback(char *topic, byte *payload, unsigned int length)
 {
-  Serial.print("📨 Message received [");
-  Serial.print(topic);
-  Serial.print("]: ");
+  Serial.printf("📨 Message received [%s]: ", topic);
 
-  // Parse JSON command
+  // ==================== PARSE JSON ====================
   StaticJsonDocument<256> doc;
   DeserializationError error = deserializeJson(doc, payload, length);
 
   if (error)
   {
-    Serial.print("✗ JSON parse error: ");
-    Serial.println(error.c_str());
+    Serial.printf("✗ JSON parse error: %s\n", error.c_str());
     return;
   }
 
   const char *command = doc["command"];
+  if (!command)
+  {
+    Serial.println("✗ Missing 'command' field");
+    return;
+  }
+
   Serial.println(command);
 
-  // Execute commands
+  // ==================== HELPER LAMBDA ====================
+  auto manualRelayControl = [&](void (*relayFunc)(bool), bool state)
+  {
+    relayFunc(state);
+    autoMode = false;
+    autoModeTemporarilyDisabled = true;
+    autoModeDisabledTime = millis();
+    Serial.println("⚠ Auto mode disabled for 30s (manual control)");
+  };
+
+  // ==================== COMMAND HANDLING ====================
+  // Manual relay controls
   if (strcmp(command, "relay1_on") == 0)
   {
-    setRelay1(true);
+    manualRelayControl(setRelay1, true);
   }
   else if (strcmp(command, "relay1_off") == 0)
   {
-    setRelay1(false);
+    manualRelayControl(setRelay1, false);
   }
   else if (strcmp(command, "relay2_on") == 0)
   {
-    setRelay2(true);
+    manualRelayControl(setRelay2, true);
   }
   else if (strcmp(command, "relay2_off") == 0)
   {
-    setRelay2(false);
+    manualRelayControl(setRelay2, false);
   }
+  // Auto mode controls
   else if (strcmp(command, "auto_on") == 0)
   {
     autoMode = true;
-    Serial.println("✓ Auto mode: ON");
+    autoModeTemporarilyDisabled = false;
+    Serial.println("✓ Auto mode: ON (manually enabled)");
   }
   else if (strcmp(command, "auto_off") == 0)
   {
     autoMode = false;
-    Serial.println("✓ Auto mode: OFF");
+    autoModeTemporarilyDisabled = false;
+    Serial.println("✓ Auto mode: OFF (manually disabled)");
   }
+  // Utility commands
   else if (strcmp(command, "reset_energy") == 0)
   {
     energyTotal = 0.0;
     Serial.println("✓ Energy counter reset");
   }
+  // Unknown command
   else
   {
-    Serial.print("✗ Unknown command: ");
-    Serial.println(command);
+    Serial.printf("✗ Unknown command: %s\n", command);
+    return; // Early return, no need to publish status
   }
 
-  // Send confirmation
+  // ==================== STATUS UPDATE ====================
   publishActuatorStatus();
 }
 
@@ -422,7 +464,7 @@ void publishData()
 
   // Status LED blink
   digitalWrite(LED_BUILTIN, HIGH);
-  delay(50);
+  delay(500);
   digitalWrite(LED_BUILTIN, LOW);
 }
 
