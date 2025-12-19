@@ -23,3 +23,6 @@ platformio run -e esp32dev
 
 | Lecture ACS712 | ✅ | Courant simulé OK  where is ?
 | Lecture LDR | ✅ | Luminosité 0-100% OK | why 0 or 100?
+
+to do if came form ac avitvate to  comfotable the ac must down
+able to close the windo form the dashboord

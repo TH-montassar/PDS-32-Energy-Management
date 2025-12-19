@@ -32,6 +32,7 @@ void publishActuatorStatus();
 void runAutomation();
 void setRelay1(bool state);
 void setRelay2(bool state);
+void setWindow(bool open);
 
 // Utils
 void blinkLED(int times);
@@ -67,14 +68,14 @@ const char *topic_control = "home/control/command";
 #define RELAY1_PIN 26         // Relay 1 (AC/Heater)
 #define RELAY2_PIN 27         // Relay 2 (Lights)
 #define LED_STATUS_PIN 5      // Status LED
-
+#define RELAY_WINDOW_PIN 25
 // Constants
 #define VOLTAGE 220.0            // Voltage réseau (V)
 #define ACS712_SENSITIVITY 0.185 // 5A model (V/A)
 #define PUBLISH_INTERVAL 5000    // Publish every 5 seconds
 #define SENSOR_READ_INTERVAL 100 // Read sensors every 100ms
 #define ACS712_OFFSET 1.65       // Midpoint voltage (0A)
-#define PRESENCE_TIMEOUT 3000    // 5 minutes (ms)
+#define PRESENCE_TIMEOUT 10000   // 1 minutes (ms)
 // ==================== OBJECTS ====================
 WiFiClient espClient;
 PubSubClient mqtt(espClient);
@@ -89,6 +90,7 @@ float current = 0.0;
 float energyTotal = 0.0;
 int lightLevel = 0;
 bool presenceDetected = false;
+bool windowState = false;
 
 // Actuator States
 bool relay1State = false;
@@ -121,11 +123,14 @@ void setup()
   pinMode(RELAY1_PIN, OUTPUT);
   pinMode(RELAY2_PIN, OUTPUT);
   pinMode(LED_STATUS_PIN, OUTPUT);
+  pinMode(RELAY_WINDOW_PIN, OUTPUT);
 
   digitalWrite(RELAY1_PIN, LOW);
   digitalWrite(RELAY2_PIN, LOW);
   digitalWrite(LED_STATUS_PIN, LOW);
   digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(RELAY_WINDOW_PIN, LOW); // Start closed
+  Serial.println("✓ Window Relay initialized");
 
   Serial.println("✓ Pins initialized");
 
@@ -273,7 +278,6 @@ void reconnectMQTT()
 }
 
 // ==================== MQTT CALLBACK ====================
-// ==================== MQTT CALLBACK ====================
 void mqttCallback(char *topic, byte *payload, unsigned int length)
 {
   Serial.printf("📨 Message received [%s]: ", topic);
@@ -324,6 +328,14 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
   else if (strcmp(command, "relay2_off") == 0)
   {
     manualRelayControl(setRelay2, false);
+  }
+  else if(strcmp(command, "window_open") == 0)
+  {
+    manualRelayControl(setWindow, true);
+  }
+  else if (strcmp(command, "window_close") == 0)
+  {
+    manualRelayControl(setWindow, false);
   }
   // Auto mode controls
   else if (strcmp(command, "auto_on") == 0)
@@ -490,6 +502,7 @@ void publishActuatorStatus()
   actuatorDoc["device_id"] = device_id;
   actuatorDoc["relay1"] = relay1State;
   actuatorDoc["relay2"] = relay2State;
+  actuatorDoc["window"] = windowState;
   actuatorDoc["auto_mode"] = autoMode;
 
   char actuatorBuffer[128];
@@ -500,6 +513,7 @@ void publishActuatorStatus()
 // ==================== AUTOMATION LOGIC ====================
 void runAutomation()
 {
+
   // Rule 1: Turn off lights when no presence
   if (!presenceDetected && relay2State)
   {
@@ -549,6 +563,19 @@ void runAutomation()
       setRelay1(false);
     }
   }
+  // Rule 5: Humidity Control (Window)
+  // If humidity is higher than 70%, open the window
+  if (humidity > 40.0 && !windowState)
+  {
+    Serial.println("🤖 AUTO: High Humidity detected! Opening Window...");
+    setWindow(true);
+  }
+  // If humidity drops below 60%, close the window
+  else if (humidity < 30.0 && windowState)
+  {
+    Serial.println("🤖 AUTO: Humidity stabilized. Closing Window...");
+    setWindow(false);
+  }
 }
 
 // ==================== RELAY CONTROL ====================
@@ -580,4 +607,12 @@ void blinkLED(int times)
     digitalWrite(LED_BUILTIN, LOW);
     delay(150);
   }
+}
+void setWindow(bool open)
+{
+  windowState = open;
+  digitalWrite(RELAY_WINDOW_PIN, open ? HIGH : LOW);
+  Serial.print("🪟 Window: ");
+  Serial.println(open ? "OPENING" : "CLOSING");
+  // Optional: Update MQTT status here if you add it to the JSON
 }
