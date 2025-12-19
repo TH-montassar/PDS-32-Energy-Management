@@ -151,8 +151,19 @@ void checkAutoModeTimer()
 {
   if (autoModeTemporarilyDisabled && !autoMode)
   {
+    unsigned long elapsed = millis() - autoModeDisabledTime;
+
+    // Afficher le temps restant toutes les 10 secondes
+    static unsigned long lastPrint = 0;
+    if (elapsed - lastPrint >= 10000)
+    {
+      unsigned long remaining = (AUTO_MODE_TIMEOUT - elapsed) / 1000;
+      Serial.printf("⏳ Auto mode re-enables in %lu seconds...\n", remaining);
+      lastPrint = elapsed;
+    }
+
     // Check if 30 seconds have passed
-    if (millis() - autoModeDisabledTime >= AUTO_MODE_TIMEOUT)
+    if (elapsed >= AUTO_MODE_TIMEOUT)
     {
       autoMode = true;
       autoModeTemporarilyDisabled = false;
