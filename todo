@@ -1,0 +1,21 @@
+
+docker compose up // run back end
+
+# Compiler
+pio run
+
+# Upload (ESP32 connecté en USB)
+pio run --target upload
+
+# Monitor série
+pio device monitor
+
+
+# clean and run
+platformio run -t fullclean
+platformio run -e esp32dev
+
+
+ÉTAPE 4 - Je veux le code ESP32 complet done
+ÉTAPE 5: Frontend Dashboard
+ÉTAPE 6: Tests et intégration finale
