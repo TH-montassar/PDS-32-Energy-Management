@@ -464,7 +464,7 @@
         <!-- Contrôle des Actionneurs -->
         <div class="card">
           <h2><span class="card-icon">🔌</span> Contrôle Équipements</h2>
-
+          <!-- Relay 1: HVAC -->
           <div style="margin-bottom: 20px">
             <div class="metric">
               <span class="metric-label">Climatisation / Chauffage</span>
@@ -482,7 +482,7 @@
               </button>
             </div>
           </div>
-
+          <!-- Relay 2: Lumières -->
           <div style="margin-bottom: 20px">
             <div class="metric">
               <span class="metric-label">Éclairage</span>
@@ -500,7 +500,25 @@
               </button>
             </div>
           </div>
-
+          <!-- NOUVEAU: Fenêtre -->
+          <div style="margin-bottom: 20px">
+            <div class="metric">
+              <span class="metric-label">🪟 Fenêtre</span>
+              <span>
+                <span class="status-indicator" id="windowIndicator"></span>
+                <span id="windowStatus">--</span>
+              </span>
+            </div>
+            <div class="button-group">
+              <button class="btn-on" onclick="controlRelay('window_open')">
+                OUVRIR
+              </button>
+              <button class="btn-off" onclick="controlRelay('window_close')">
+                FERMER
+              </button>
+            </div>
+          </div>
+          <!-- Mode Auto -->
           <div>
             <div class="metric">
               <span class="metric-label">Mode Automatique</span>
@@ -848,6 +866,7 @@
 
           updateRelayStatus("relay1", data.relay1);
           updateRelayStatus("relay2", data.relay2);
+          updateRelayStatus("window", data.window || false);
 
           const autoStatus = document.getElementById("autoModeStatus");
           if (data.auto_mode) {

@@ -204,14 +204,24 @@ def store_actuator_state(data):
     """Stocke l'état des actionneurs"""
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    
+    # Vérifier si la table a la colonne 'window'
+    cursor.execute("PRAGMA table_info(actuator_states)")
+    columns = [column[1] for column in cursor.fetchall()]
+
+    if 'window' not in columns:
+        # Ajouter la colonne window si elle n'existe pas
+        cursor.execute('ALTER TABLE actuator_states ADD COLUMN window BOOLEAN DEFAULT 0')
+        conn.commit()
+        print("✓ Column 'window' added to actuator_states table")
+
     cursor.execute('''
-        INSERT INTO actuator_states (device_id, relay1, relay2, auto_mode)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO actuator_states (device_id, relay1, relay2, window, auto_mode)
+        VALUES (?, ?, ?, ?, ?)
     ''', (
         data.get('device_id'),
         data.get('relay1'),
         data.get('relay2'),
+        data.get('window', False),
         data.get('auto_mode')
     ))
     
@@ -446,24 +456,45 @@ def get_actuators_status():
     """Récupère l'état des actionneurs"""
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    
-    cursor.execute('''
-        SELECT relay1, relay2, auto_mode, timestamp
-        FROM actuator_states
-        ORDER BY timestamp DESC
-        LIMIT 1
-    ''')
-    
+    # Vérifier si la colonne window existe
+    cursor.execute("PRAGMA table_info(actuator_states)")
+    columns = [column[1] for column in cursor.fetchall()]
+    has_window = 'window' in columns
+    if has_window:
+        cursor.execute('''
+            SELECT relay1, relay2, window, auto_mode, timestamp
+            FROM actuator_states
+            ORDER BY timestamp DESC
+            LIMIT 1
+        ''')
+    else:
+        cursor.execute('''
+            SELECT relay1, relay2, auto_mode, timestamp
+            FROM actuator_states
+            ORDER BY timestamp DESC
+            LIMIT 1
+        ''')
+
     row = cursor.fetchone()
     conn.close()
-    
+
     if row:
-        return jsonify({
-            'relay1': bool(row[0]),
-            'relay2': bool(row[1]),
-            'auto_mode': bool(row[2]),
-            'timestamp': row[3]
-        })
+        if has_window:
+            return jsonify({
+                'relay1': bool(row[0]),
+                'relay2': bool(row[1]),
+                'window': bool(row[2]),
+                'auto_mode': bool(row[3]),
+                'timestamp': row[4]
+            })
+        else:
+            return jsonify({
+                'relay1': bool(row[0]),
+                'relay2': bool(row[1]),
+                'window': False,
+                'auto_mode': bool(row[2]),
+                'timestamp': row[3]
+            })
     else:
         return jsonify({'error': 'No data available'}), 404
 

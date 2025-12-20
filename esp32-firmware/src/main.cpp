@@ -497,7 +497,7 @@ void publishActuatorStatus()
   if (!mqtt.connected())
     return;
 
-  StaticJsonDocument<128> actuatorDoc;
+  StaticJsonDocument<256> actuatorDoc;
   actuatorDoc["timestamp"] = millis();
   actuatorDoc["device_id"] = device_id;
   actuatorDoc["relay1"] = relay1State;
