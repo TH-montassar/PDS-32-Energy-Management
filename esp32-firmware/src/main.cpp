@@ -68,7 +68,7 @@ const char *topic_control = "home/control/command";
 #define RELAY1_PIN 26         // Relay 1 (AC/Heater)
 #define RELAY2_PIN 27         // Relay 2 (Lights)
 #define LED_STATUS_PIN 5      // Status LED
-#define RELAY_WINDOW_PIN 25
+#define RELAY_WINDOW_PIN 15
 // Constants
 #define VOLTAGE 220.0            // Voltage réseau (V)
 #define ACS712_SENSITIVITY 0.185 // 5A model (V/A)
@@ -329,7 +329,7 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
   {
     manualRelayControl(setRelay2, false);
   }
-  else if(strcmp(command, "window_open") == 0)
+  else if (strcmp(command, "window_open") == 0)
   {
     manualRelayControl(setWindow, true);
   }

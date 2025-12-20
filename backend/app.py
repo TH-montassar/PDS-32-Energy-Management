@@ -677,6 +677,11 @@ def mqtt_loop():
     except Exception as e:
         print(f"MQTT Error: {e}")
 
+@app.route('/dashboard')
+def dashboard():
+    """Page dashboard"""
+    return render_template('dashboard.html')
+
 # ==================== MAIN ====================
 if __name__ == '__main__':
     print("\n" + "="*50)
