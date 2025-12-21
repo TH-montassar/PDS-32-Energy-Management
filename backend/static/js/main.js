@@ -149,33 +149,30 @@ async function fetchAllData() {
 
 async function updateLiveStatus() {
   try {
-    const response = await fetch(
-      `${API_BASE.replace("/api", "")}/api/status/live`
-    );
+    // Utilise directement API_BASE + le chemin
+    const response = await fetch(`${API_BASE}/status/live`);
     const data = await response.json();
 
-    // 1. AJOUT : Il faut récupérer l'élément container
     const container = document.getElementById("deviceStatusContainer");
     const dot = document.getElementById("statusDot");
     const text = document.getElementById("statusText");
 
+    // DEBUG : Ajoute ce log pour voir ce que le JS reçoit vraiment
+    console.log("Statut reçu du serveur:", data);
+
     if (data.status === "online") {
-      container.style.backgroundColor = "#10b981"; // Fond Vert
-      dot.style.backgroundColor = "#ffffff"; // Point Blanc
-      dot.classList.add("pulse-dot");
-
+      container.style.backgroundColor = "#10b981"; // Vert
       text.innerText = "LIVE";
-      text.style.color = "#ffffff"; // TEXTE EN BLANC ICI ✅ (Pas en vert !)
+      dot.classList.add("pulse-dot");
     } else {
-      container.style.backgroundColor = "#ef4444"; // Fond Rouge
-      dot.style.backgroundColor = "#ffffff"; // Point Blanc
-      dot.classList.remove("pulse-dot");
-
+      container.style.backgroundColor = "#ef4444"; // Rouge
       text.innerText = "DOWN";
-      text.style.color = "#ffffff"; // TEXTE EN BLANC ICI ✅
+      dot.classList.remove("pulse-dot");
     }
+    text.style.color = "#ffffff";
+    dot.style.backgroundColor = "#ffffff";
   } catch (err) {
-    console.error("Erreur statut live:", err);
+    console.error("Erreur Fetch Statut:", err);
   }
 }
 async function fetchCurrentEnergy() {

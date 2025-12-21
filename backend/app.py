@@ -34,7 +34,7 @@ ELECTRICITY_TARIF = 0.15  # TND/kWh
 
 # ... GLOBAL STATES ...
 device_live_status = "offline"
-
+#last_seen = "Jamais"
 # ==================== DATABASE SETUP ====================
 def init_database():
     """Initialise la base de données SQLite"""
@@ -129,11 +129,12 @@ def on_message(client, userdata, msg):
         # 1. On décode d'abord le message en texte brut (String)
         raw_payload = msg.payload.decode()
         topic = msg.topic
-        
+        #last_seen = datetime.now().strftime("%H:%M:%S")
         # 2. Cas spécial : Le Statut (ce n'est pas du JSON !)
         if topic == "home/status/device":
-            device_live_status = raw_payload # Stocke "online" ou "offline"
+            device_live_status = raw_payload.strip().lower()  # Stocke "online" ou "offline"
             print(f"📡 Device is now: {device_live_status.upper()}")
+            print(f"DEBUG: Statut reçu sur Python -> {device_live_status}")
             return # On s'arrête ici pour ce topic
 
         # 3. Pour les autres topics, on décode le JSON
@@ -651,7 +652,8 @@ def get_live_status():
     return jsonify({
         'status': device_live_status,
         #'color': 'green' if device_live_status == 'online' else 'red',
-        'label': 'LIVE' if device_live_status == 'online' else 'DOWN'
+        'label': 'LIVE' if device_live_status == 'online' else 'DOWN',
+        #'last_seen': last_seen
     })
 # ==================== MQTT THREAD ====================
 def mqtt_loop():
