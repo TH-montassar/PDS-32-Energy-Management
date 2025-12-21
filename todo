@@ -25,8 +25,8 @@ platformio run -e esp32dev
 | Lecture ACS712 | ✅ | Courant simulé OK  where is ?
 | Lecture LDR | ✅ | Luminosité 0-100% OK | why 0 or 100?
 
--to do if came form ac avitvate to  comfotable the ac must down
-
+-to do
+ -if came form ac avitvate to  comfotable the ac must down 
 -Température & Humidité (24h) alwys empty why ?
 -th alert Alertes Récentes 🔴 Aucune consommation détectée 20/12/2025 08:09:38 why with danger clolor
 -i wana if the hard whare not connecte the the internal the live trun to  doown incative

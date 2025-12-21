@@ -1,0 +1,80 @@
+ <!DOCTYPE html>
+ <html>
+
+ <head>
+     <title>PDS-32 - Energy Management</title>
+     <style>
+         body {
+             font-family: Arial, sans-serif;
+             max-width: 800px;
+             margin: 50px auto;
+             padding: 20px;
+             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+             color: white;
+         }
+
+         .container {
+             background: white;
+             color: #333;
+             padding: 30px;
+             border-radius: 15px;
+             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+         }
+
+         h1 {
+             color: #667eea;
+         }
+
+         .status {
+             background: #10b981;
+             color: white;
+             padding: 10px;
+             border-radius: 5px;
+             display: inline-block;
+         }
+
+         .endpoint {
+             background: #f3f4f6;
+             padding: 10px;
+             margin: 10px 0;
+             border-radius: 5px;
+             font-family: monospace;
+         }
+
+         a {
+             color: #667eea;
+             text-decoration: none;
+         }
+
+         a:hover {
+             text-decoration: underline;
+         }
+     </style>
+ </head>
+
+ <body>
+     <div class="container">
+         <h1>🔋 PDS-32 - Energy Management System</h1>
+         <p class="status">✓ Backend Server Running</p>
+
+         <h2>📡 API Endpoints:</h2>
+         <div class="endpoint">GET <a href="/api/energy/current">/api/energy/current</a></div>
+         <div class="endpoint">GET <a href="/api/energy/history?hours=24">/api/energy/history?hours=24</a></div>
+         <div class="endpoint">GET <a href="/api/sensors/current">/api/sensors/current</a></div>
+         <div class="endpoint">GET <a href="/api/presence/current">/api/presence/current</a></div>
+         <div class="endpoint">GET <a href="/api/actuators/status">/api/actuators/status</a></div>
+         <div class="endpoint">POST /api/control/relay</div>
+         <div class="endpoint">GET <a href="/api/analytics/consumption">/api/analytics/consumption</a></div>
+         <div class="endpoint">GET <a href="/api/alerts">/api/alerts</a></div>
+         <div class="endpoint">GET <a href="/api/statistics/hourly">/api/statistics/hourly</a></div>
+         <div class="endpoint">GET <a href="/api/statistics/daily">/api/statistics/daily</a></div>
+
+         <h2>🎨 Dashboard:</h2>
+         <p><a href="/dashboard">Open Dashboard →</a></p>
+
+         <hr>
+         <p style="color: #999;">PDS-32 Project | Version 1.0</p>
+     </div>
+ </body>
+
+ </html>
