@@ -22,7 +22,8 @@ MQTT_TOPICS = [
     ("home/energy/power", 0),
     ("home/sensors/environment", 0),
     ("home/sensors/presence", 0),
-    ("home/actuators/status", 0)
+    ("home/actuators/status", 0),
+    ("home/status/device", 0)
 ]
 
 DATA_DIR = '/app/data'
@@ -30,6 +31,9 @@ os.makedirs(DATA_DIR, exist_ok=True)
 
 DATABASE = os.path.join(DATA_DIR, 'energy_data.db')
 ELECTRICITY_TARIF = 0.15  # TND/kWh
+
+# ... GLOBAL STATES ...
+device_live_status = "offline"
 
 # ==================== DATABASE SETUP ====================
 def init_database():
@@ -120,13 +124,23 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     """Callback quand un message MQTT est reçu"""
+    global device_live_status
     try:
-        payload = json.loads(msg.payload.decode())
+        # 1. On décode d'abord le message en texte brut (String)
+        raw_payload = msg.payload.decode()
         topic = msg.topic
         
+        # 2. Cas spécial : Le Statut (ce n'est pas du JSON !)
+        if topic == "home/status/device":
+            device_live_status = raw_payload # Stocke "online" ou "offline"
+            print(f"📡 Device is now: {device_live_status.upper()}")
+            return # On s'arrête ici pour ce topic
+
+        # 3. Pour les autres topics, on décode le JSON
+        payload = json.loads(raw_payload)
         print(f"📨 Received [{topic}]: {payload}")
         
-        # Traiter selon le topic
+        # 4. Traitement des données JSON
         if topic == "home/energy/power":
             store_energy_data(payload)
             check_energy_alerts(payload)
@@ -141,6 +155,8 @@ def on_message(client, userdata, msg):
         elif topic == "home/actuators/status":
             store_actuator_state(payload)
             
+    except json.JSONDecodeError:
+        print(f"✗ Erreur : Le message sur {topic} n'est pas un JSON valide")
     except Exception as e:
         print(f"Error processing message: {e}")
 
@@ -630,7 +646,13 @@ def get_daily_statistics():
         })
     
     return jsonify(data)
-
+@app.route('/api/status/live', methods=['GET'])
+def get_live_status():
+    return jsonify({
+        'status': device_live_status,
+        #'color': 'green' if device_live_status == 'online' else 'red',
+        'label': 'LIVE' if device_live_status == 'online' else 'DOWN'
+    })
 # ==================== MQTT THREAD ====================
 def mqtt_loop():
     """Thread pour le client MQTT"""

@@ -135,6 +135,7 @@ async function fetchAllData() {
       fetchAnalytics(),
       fetchEnergyHistory(),
       fetchAlerts(),
+      updateLiveStatus(),
     ]);
 
     updateLastUpdateTime();
@@ -144,7 +145,39 @@ async function fetchAllData() {
 }
 
 // ==================== API CALLS ====================
+// ... après fetchAlerts() ...
 
+async function updateLiveStatus() {
+  try {
+    const response = await fetch(
+      `${API_BASE.replace("/api", "")}/api/status/live`
+    );
+    const data = await response.json();
+
+    // 1. AJOUT : Il faut récupérer l'élément container
+    const container = document.getElementById("deviceStatusContainer");
+    const dot = document.getElementById("statusDot");
+    const text = document.getElementById("statusText");
+
+    if (data.status === "online") {
+      container.style.backgroundColor = "#10b981"; // Fond Vert
+      dot.style.backgroundColor = "#ffffff"; // Point Blanc
+      dot.classList.add("pulse-dot");
+
+      text.innerText = "LIVE";
+      text.style.color = "#ffffff"; // TEXTE EN BLANC ICI ✅ (Pas en vert !)
+    } else {
+      container.style.backgroundColor = "#ef4444"; // Fond Rouge
+      dot.style.backgroundColor = "#ffffff"; // Point Blanc
+      dot.classList.remove("pulse-dot");
+
+      text.innerText = "DOWN";
+      text.style.color = "#ffffff"; // TEXTE EN BLANC ICI ✅
+    }
+  } catch (err) {
+    console.error("Erreur statut live:", err);
+  }
+}
 async function fetchCurrentEnergy() {
   try {
     const response = await fetch(`${API_BASE}/energy/current`);

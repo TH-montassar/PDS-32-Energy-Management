@@ -250,9 +250,12 @@ void reconnectMQTT()
 
     String clientId = "ESP32_" + String(device_id) + "_" + String(random(0xffff), HEX);
 
-    if (mqtt.connect(clientId.c_str(), mqtt_user, mqtt_password))
+    if (mqtt.connect(clientId.c_str(), mqtt_user, mqtt_password, "home/status/device", 1, true, "offline"))
     {
       Serial.println(" ✓ Connected!");
+
+      // AJOUT ICI : On informe immédiatement qu'on est en ligne
+      mqtt.publish("home/status/device", "online", true);
 
       // Subscribe to control topic
       mqtt.subscribe(topic_control);
@@ -416,7 +419,7 @@ void readSensors()
     lightLevel = 100.0;
   if (lightLevel < 0.0)
     lightLevel = 0.0;
-  Serial.printf("🔦 LDR: Raw=%d, Level=%.2f%%\n", rawLight, lightLevel);
+  // Serial.printf("🔦 LDR: Raw=%d, Level=%.2f%%\n", rawLight, lightLevel);
 
   // Read PIR Motion Sensor
   bool currentPresence = digitalRead(PIR_PIN);
