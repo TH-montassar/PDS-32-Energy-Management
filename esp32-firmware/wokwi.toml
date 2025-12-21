@@ -118,7 +118,6 @@
     [ "pir1:OUT", "esp:13", "blue", [ "v0" ] ],
     [ "pir1:GND", "esp:GND.1", "black", [ "v0" ] ],
     [ "ldr1:VCC", "esp:3V3", "red", [ "h0" ] ],
-    [ "ldr1:DO", "esp:35", "gold", [ "h48", "v133.8" ] ],
     [ "ldr1:GND", "esp:GND.1", "black", [ "h76.8", "v220.4" ] ],
     [ "relay1:VCC", "esp:VIN", "red", [ "h67.2", "v144" ] ],
     [ "relay1:GND", "esp:GND.1", "black", [ "h96", "v106" ] ],
@@ -143,7 +142,8 @@
     [ "led4:C", "r4:2", "green", [ "v0" ] ],
     [ "r4:1", "esp:GND.1", "green", [ "h134.4", "v-134.4" ] ],
     [ "relay3:COM", "led4:A", "purple", [ "v58.8", "h-469", "v-86.4" ] ],
-    [ "relay3:NO", "esp:3V3", "orange", [ "v-478.8", "h-190.35" ] ]
+    [ "relay3:NO", "esp:3V3", "orange", [ "v-478.8", "h-190.35" ] ],
+    [ "esp:35", "ldr1:AO", "orange", [ "h0" ] ]
   ],
   "dependencies": {}
 }

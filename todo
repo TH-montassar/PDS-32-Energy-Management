@@ -2,7 +2,7 @@
 #Restart Backend:
 docker compose up // run back end
 docker-compose down
-docker-compose up --build
+docker compose up --build
 
 
 # Compiler

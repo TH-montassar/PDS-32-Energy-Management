@@ -410,12 +410,13 @@ void readSensors()
   // Read Light Sensor (LDR)
   int rawLight = analogRead(LDR_PIN);
 
-  lightLevel = (4000.0 - (float)rawLight) * 100.0 / 3900.0;
-  // Sécurité pour rester entre 0 et 100
+  lightLevel = (4095.0 - (float)rawLight) * 100.0 / 4063.0;
+  // Sécurité indispensable
   if (lightLevel > 100.0)
     lightLevel = 100.0;
   if (lightLevel < 0.0)
     lightLevel = 0.0;
+  Serial.printf("🔦 LDR: Raw=%d, Level=%.2f%%\n", rawLight, lightLevel);
 
   // Read PIR Motion Sensor
   bool currentPresence = digitalRead(PIR_PIN);
