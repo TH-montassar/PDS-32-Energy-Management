@@ -88,7 +88,7 @@ float humidity = 0.0;
 float power = 0.0;
 float current = 0.0;
 float energyTotal = 0.0;
-int lightLevel = 0;
+float lightLevel = 0;
 bool presenceDetected = false;
 bool windowState = false;
 
@@ -384,6 +384,8 @@ void readSensors()
   int sensorValue = analogRead(CURRENT_SENSOR_PIN);
   float voltage = (sensorValue / 4095.0) * 3.3; // ESP32 ADC 12-bit
 
+  // Serial.printf("Read Current Sensor (ACS712) =  %d%%\n", sensorValue);
+
   // Calculate current (offset = 1.65V for 0A)
   current = abs((voltage - ACS712_OFFSET) / ACS712_SENSITIVITY);
 
@@ -407,7 +409,13 @@ void readSensors()
 
   // Read Light Sensor (LDR)
   int rawLight = analogRead(LDR_PIN);
-  lightLevel = map(rawLight, 0, 4095, 0, 100); // Convert to percentage
+
+  lightLevel = (4000.0 - (float)rawLight) * 100.0 / 3900.0;
+  // Sécurité pour rester entre 0 et 100
+  if (lightLevel > 100.0)
+    lightLevel = 100.0;
+  if (lightLevel < 0.0)
+    lightLevel = 0.0;
 
   // Read PIR Motion Sensor
   bool currentPresence = digitalRead(PIR_PIN);
@@ -478,7 +486,7 @@ void publishData()
   Serial.printf("Temperature: %.1f°C | Humidity: %.1f%%\n", temperature, humidity);
   Serial.printf("Power: %.2fW | Current: %.2fA\n", power, current);
   Serial.printf("Energy Total: %.3f kWh\n", energyTotal);
-  Serial.printf("Light: %d%% | Presence: %s\n", lightLevel, presenceDetected ? "Yes" : "No");
+  Serial.printf("Light: %.2f%% | Presence: %s\n", lightLevel, presenceDetected ? "Yes" : "No");
   Serial.printf("Relay1: %s | Relay2: %s | Auto: %s\n",
                 relay1State ? "ON" : "OFF",
                 relay2State ? "ON" : "OFF",
