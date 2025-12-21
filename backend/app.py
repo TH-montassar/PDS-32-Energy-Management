@@ -7,7 +7,7 @@ from flask_cors import CORS
 import paho.mqtt.client as mqtt
 import sqlite3
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import threading
 import time
 import os
@@ -34,7 +34,7 @@ ELECTRICITY_TARIF = 0.15  # TND/kWh
 
 # ... GLOBAL STATES ...
 device_live_status = "offline"
-#last_seen = "Jamais"
+last_seen = "Jamais"
 # ==================== DATABASE SETUP ====================
 def init_database():
     """Initialise la base de données SQLite"""
@@ -124,17 +124,19 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     """Callback quand un message MQTT est reçu"""
-    global device_live_status
+    global device_live_status, last_seen
     try:
         # 1. On décode d'abord le message en texte brut (String)
         raw_payload = msg.payload.decode()
         topic = msg.topic
-        #last_seen = datetime.now().strftime("%H:%M:%S")
         # 2. Cas spécial : Le Statut (ce n'est pas du JSON !)
         if topic == "home/status/device":
             device_live_status = raw_payload.strip().lower()  # Stocke "online" ou "offline"
             print(f"📡 Device is now: {device_live_status.upper()}")
             print(f"DEBUG: Statut reçu sur Python -> {device_live_status}")
+            if device_live_status == "online":
+                last_seen = (datetime.now() + timedelta(hours=1)).strftime("%H:%M:%S")
+
             return # On s'arrête ici pour ce topic
 
         # 3. Pour les autres topics, on décode le JSON
@@ -653,7 +655,7 @@ def get_live_status():
         'status': device_live_status,
         #'color': 'green' if device_live_status == 'online' else 'red',
         'label': 'LIVE' if device_live_status == 'online' else 'DOWN',
-        #'last_seen': last_seen
+        'last_seen': last_seen
     })
 # ==================== MQTT THREAD ====================
 def mqtt_loop():

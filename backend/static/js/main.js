@@ -152,13 +152,18 @@ async function updateLiveStatus() {
     // Utilise directement API_BASE + le chemin
     const response = await fetch(`${API_BASE}/status/live`);
     const data = await response.json();
+    console.log("Statut reçu du serveur:", data);
 
     const container = document.getElementById("deviceStatusContainer");
     const dot = document.getElementById("statusDot");
     const text = document.getElementById("statusText");
+    const lastSeenEl = document.getElementById("lastSeenDisplay");
 
     // DEBUG : Ajoute ce log pour voir ce que le JS reçoit vraiment
-    console.log("Statut reçu du serveur:", data);
+
+    if (lastSeenEl) {
+      lastSeenEl.innerText = `Dernière activité : ${data.last_seen}`;
+    }
 
     if (data.status === "online") {
       container.style.backgroundColor = "#10b981"; // Vert
@@ -222,7 +227,9 @@ async function fetchCurrentSensors() {
     )}<span class="metric-unit">%</span>`;
     document.getElementById(
       "lightLevel"
-    ).innerHTML = `${data.light_level}<span class="metric-unit">%</span>`;
+    ).innerHTML = `${data.light_level.toFixed(
+      2
+    )}<span class="metric-unit">%</span>`;
   } catch (error) {
     console.error("Error fetching sensors:", error);
   }
