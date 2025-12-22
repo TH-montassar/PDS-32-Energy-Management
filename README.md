@@ -32,10 +32,25 @@ docker-compose down
 ├── docker-compose.yml
 └── README.md
 ```
+  projet ESP32 
+### Installation
+
+
+    Download and install official Microsoft Visual Studio Code. PlatformIO IDE is built on top of it
+
+    Open VSCode Package Manager
+
+    Search for the official platformio ide extension
+
+    Install PlatformIO IDE.
+###compile
+ -to do 
+dubloy
+get  the  .elf file 
 
 ### Wokwi (Simulation ESP32)
 - Ouvrir: https://wokwi.com/
-- Charger le projet ESP32
+- Charger le projet ESP32 (.elf)
 - Connecter au MQTT broker: broker.hivemq.com
 
 ## 📊 Fonctionnalités
