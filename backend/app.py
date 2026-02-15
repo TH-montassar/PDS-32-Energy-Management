@@ -356,6 +356,68 @@ def get_energy_history():
     
     return jsonify(data)
 
+@app.route('/api/history', methods=['GET'])
+def get_device_history():
+    """Récupère l'historique consolidé des dernières activités"""
+    limit = request.args.get('limit', default=20, type=int)
+    limit = max(1, min(limit, 100))
+
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        SELECT * FROM (
+            SELECT
+                timestamp,
+                'energy' as category,
+                device_id,
+                printf('Puissance: %.2fW | Énergie: %.3fkWh | Coût: %.3f TND', power, energy_total, cost) as details
+            FROM energy_data
+
+            UNION ALL
+
+            SELECT
+                timestamp,
+                'sensor' as category,
+                device_id,
+                printf('Temp: %.1f°C | Humidité: %.1f%% | Luminosité: %d%%', temperature, humidity, light_level) as details
+            FROM sensor_readings
+
+            UNION ALL
+
+            SELECT
+                timestamp,
+                'presence' as category,
+                device_id,
+                CASE
+                    WHEN presence = 1 THEN 'Présence détectée'
+                    ELSE 'Aucune présence'
+                END as details
+            FROM presence_data
+
+            UNION ALL
+
+            SELECT
+                timestamp,
+                'actuator' as category,
+                device_id,
+                printf('HVAC: %s | Lumière: %s | Auto: %s',
+                    CASE WHEN relay1 = 1 THEN 'ON' ELSE 'OFF' END,
+                    CASE WHEN relay2 = 1 THEN 'ON' ELSE 'OFF' END,
+                    CASE WHEN auto_mode = 1 THEN 'ON' ELSE 'OFF' END
+                ) as details
+            FROM actuator_states
+        )
+        ORDER BY timestamp DESC
+        LIMIT ?
+    ''', (limit,))
+
+    history = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+
+    return jsonify(history)
+
 @app.route('/api/sensors/current', methods=['GET'])
 def get_current_sensors():
     """Récupère les données des capteurs actuelles"""

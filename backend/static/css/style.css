@@ -374,3 +374,67 @@ button:active {
     background: rgba(102, 126, 234, 0.2);
   }
 }
+
+
+/* ==================== HISTORY ==================== */
+.history-container {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.history-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: #f8fafc;
+}
+
+.history-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.history-badge {
+  color: #fff;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.78em;
+  font-weight: 700;
+}
+
+.history-energy {
+  background: #f59e0b;
+}
+
+.history-sensor {
+  background: #3b82f6;
+}
+
+.history-presence {
+  background: #10b981;
+}
+
+.history-actuator {
+  background: #8b5cf6;
+}
+
+.history-time {
+  font-size: 0.8em;
+  color: #6b7280;
+}
+
+.history-details {
+  color: #111827;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.history-device {
+  color: #6b7280;
+  font-size: 0.86em;
+}

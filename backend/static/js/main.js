@@ -135,6 +135,7 @@ async function fetchAllData() {
       fetchAnalytics(),
       fetchEnergyHistory(),
       fetchAlerts(),
+      fetchDeviceHistory(),
       updateLiveStatus(),
     ]);
 
@@ -383,6 +384,64 @@ async function fetchEnergyHistory() {
     powerChart.update("none");
   } catch (error) {
     console.error("Error fetching history:", error);
+  }
+}
+
+
+async function fetchDeviceHistory() {
+  try {
+    const response = await fetch(`${API_BASE}/history?limit=20`);
+    if (!response.ok) return;
+
+    const events = await response.json();
+    const container = document.getElementById("historyContainer");
+
+    if (!container) return;
+
+    if (events.length === 0) {
+      container.innerHTML =
+        '<div class="alert alert-info">Aucun historique disponible pour le moment.</div>';
+      return;
+    }
+
+    container.innerHTML = "";
+
+    events.forEach((event) => {
+      const item = document.createElement("div");
+      item.className = "history-item";
+
+      const badgeClass = `history-badge history-${event.category}`;
+      const badgeLabel = getHistoryLabel(event.category);
+      const time = new Date(event.timestamp).toLocaleString("fr-FR");
+
+      item.innerHTML = `
+        <div class="history-top-row">
+          <span class="${badgeClass}">${badgeLabel}</span>
+          <span class="history-time">${time}</span>
+        </div>
+        <div class="history-details">${event.details}</div>
+        <div class="history-device">Appareil: ${event.device_id || "N/A"}</div>
+      `;
+
+      container.appendChild(item);
+    });
+  } catch (error) {
+    console.error("Error fetching device history:", error);
+  }
+}
+
+function getHistoryLabel(category) {
+  switch (category) {
+    case "energy":
+      return "⚡ Énergie";
+    case "sensor":
+      return "🌡️ Capteur";
+    case "presence":
+      return "🚶 Présence";
+    case "actuator":
+      return "🔌 Actionneur";
+    default:
+      return "📌 Événement";
   }
 }
 
